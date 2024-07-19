@@ -20,4 +20,9 @@ from join.views import LoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/login/', LoginView.as_view()),
+    # path('api/register/', RegisterView.as_view()),
+    # path('api/logout/', LogoutView.as_view()),
+    # path('api/tasks/', ListTasks.as_view()),
+    # path('api/tasks/<int:pk>/', TasksDetailView.as_view()),
 ]
+
