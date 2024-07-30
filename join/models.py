@@ -9,9 +9,9 @@ class TaskItem(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateField(default=datetime.date.today),
     # priority = models. ,
-    # due_date = models.DateField(default=datetime.date.today),
+    due_date = models.DateField(default=datetime.date.today),
     # state = ,
-    # checked = models.BooleanField(default=False)
+    isDone = models.BooleanField(default=False)
     
     def __str__(self) -> str:
         return f'({self.id}) --- {self.title}'

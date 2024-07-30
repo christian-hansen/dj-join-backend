@@ -15,14 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from join.views import LoginView
+from join.views import LoginView, RegisterView, ListTasks, TaskDetailView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/login/', LoginView.as_view()),
-    # path('api/register/', RegisterView.as_view()),
-    # path('api/logout/', LogoutView.as_view()),
-    # path('api/tasks/', ListTasks.as_view()),
-    # path('api/tasks/<int:pk>/', TasksDetailView.as_view()),
+    path('api/v1/register/', RegisterView.as_view()),
+    path('api/v1/tasks/', ListTasks.as_view()),
+    path('api/v1/tasks/<int:pk>/', TaskDetailView.as_view()),
 ]
 
