@@ -25,4 +25,3 @@ urlpatterns = [
     path('api/v1/tasks/', ListTasks.as_view()),
     path('api/v1/tasks/<int:pk>/', TaskDetailView.as_view()),
 ]
-
