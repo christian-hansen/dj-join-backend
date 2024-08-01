@@ -4,7 +4,8 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-up.sh
+migrate.sh
+test.sh
 
 # Icon must end with two \r
 Icon
