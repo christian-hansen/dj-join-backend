@@ -63,8 +63,8 @@ class ListTasks(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        # ' tasks = TodoItem.objects.all() to show all todos instead of filtered
-        tasks = TaskItem.objects.filter(author=request.user)
+        tasks = TaskItem.objects.all() # to show all tasks for all users
+        # tasks = TaskItem.objects.filter(author=request.user) # to show only the user tasks for the current user
         serializer = TaskItemSerializer(tasks, many=True)
         return Response(serializer.data)
 
