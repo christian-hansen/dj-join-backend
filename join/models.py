@@ -5,9 +5,9 @@ import datetime
 # Create your models here.
 # Specifying the priorities
 PRIORITIES = (
-    ("prio3", "High"),
-    ("prio2", "Medium"),
-    ("prio1", "Low")
+    ("High", "High"),
+    ("Medium", "Medium"),
+    ("Low", "Low")
 )
 
 # Specifying the priorities
