@@ -24,7 +24,7 @@ class TaskItem(models.Model):
     description = models.CharField(max_length=500)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateField(default=datetime.date.today)
-    priority = models.CharField(max_length=10, choices=PRIORITIES, default='prio1')
+    priority = models.CharField(max_length=10, choices=PRIORITIES, default='Low')
     due_date = models.DateField(default=datetime.date.today)
     state = models.CharField(max_length=20, choices=STATES, default='To Do')
     isDone = models.BooleanField(default=False)
