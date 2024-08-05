@@ -12,10 +12,10 @@ PRIORITIES = (
 
 # Specifying the priorities
 STATES = (
-    ("state1", "To Do"),
-    ("state2", "In Progress"),
-    ("state3", "Awaiting Feedback"),
-    ("state4", "Done")
+    ("To Do", "To Do"),
+    ("In Progress", "In Progress"),
+    ("Awaiting Feedback", "Awaiting Feedback"),
+    ("Done", "Done")
 )
 
 
@@ -26,7 +26,7 @@ class TaskItem(models.Model):
     created_at = models.DateField(default=datetime.date.today)
     priority = models.CharField(max_length=10, choices=PRIORITIES, default='prio1')
     due_date = models.DateField(default=datetime.date.today)
-    state = models.CharField(max_length=10, choices=STATES, default='state1')
+    state = models.CharField(max_length=20, choices=STATES, default='To Do')
     isDone = models.BooleanField(default=False)
 
     def __str__(self) -> str:
