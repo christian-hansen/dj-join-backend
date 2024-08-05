@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from join.views import LoginView, RegisterView, ListTasks, TaskDetailView, ListUsers
+from join.views import LoginView, RegisterView, ListTasks, TaskDetailView, ListUsers, CurrentUserView
 
 
 urlpatterns = [
@@ -25,5 +25,6 @@ urlpatterns = [
     path('api/v1/tasks/', ListTasks.as_view()),
     path('api/v1/tasks/<int:pk>/', TaskDetailView.as_view()),
     path('api/v1/users/', ListUsers.as_view()),
+    path('api/v1/current_user/', CurrentUserView.as_view()),
     # path('api/v1/users/<int:pk>/', UserDetailView.as_view()),
 ]
