@@ -28,6 +28,6 @@ class TaskItem(models.Model):
     due_date = models.DateField(default=datetime.date.today)
     state = models.CharField(max_length=20, choices=STATES, default='To Do')
     isDone = models.BooleanField(default=False)
-
+    
     def __str__(self) -> str:
         return f'({self.id}) --- {self.title}'

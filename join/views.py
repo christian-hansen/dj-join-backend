@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.views import View
 from join.models import TaskItem
-from join.serializers import TaskItemSerializer
+from join.serializers import TaskItemSerializer, UserItemSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -34,6 +34,8 @@ class RegisterView(APIView):
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
         email = request.data.get('email')
         password = request.data.get('password')
 
@@ -49,7 +51,7 @@ class RegisterView(APIView):
         try:
             # Create the user
             user = User.objects.create_user(
-                username=username, email=email, password=password)
+                username=username, email=email, password=password, first_name=first_name, last_name=last_name)
 
             return Response({"message": "User created successfully."}, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -111,3 +113,14 @@ class TaskDetailView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ListUsers(APIView):
+    # All Users
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, format=None):
+        users = User.objects.all() 
+        serializer = UserItemSerializer(users, many=True)
+        return Response(serializer.data)
