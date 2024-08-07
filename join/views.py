@@ -51,7 +51,7 @@ class RegisterView(APIView):
         try:
             # Create the user
             user = User.objects.create_user(
-                username=username, email=email, password=password, first_name=first_name, last_name=last_name)
+            username=username, email=email, password=password, first_name=first_name, last_name=last_name)
 
             return Response({"message": "User created successfully."}, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -65,23 +65,19 @@ class ListTasks(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        tasks = TaskItem.objects.all() # to show all tasks for all users
-        # tasks = TaskItem.objects.filter(author=request.user) # to show only the user tasks for the current user
+        tasks = TaskItem.objects.all() # option to show all tasks for all users
+        # tasks = TaskItem.objects.filter(author=request.user) # option to show only the user tasks for the current user
         serializer = TaskItemSerializer(tasks, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
         data = request.data.copy()  # Make a copy of the request data
-        # Add the author using the current user
-        data['author'] = request.user.id
+        data['author'] = request.user.id # Add the author using the current user
 
         serializer = TaskItemSerializer(data=data)
         if serializer.is_valid():
             serializer.save()  # Save the data to the database
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            # Print serializer errors for debugging
-            print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -116,7 +112,7 @@ class TaskDetailView(APIView):
 
 class ListUsers(APIView):
     # All Users
-
+    
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
