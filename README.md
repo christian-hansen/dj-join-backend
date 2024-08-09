@@ -35,6 +35,13 @@ This is a learning project created as part of my studies with the Developer Akad
     open http://localhost:8000/admin
     ```
 
+## Running included tests
+To run the include test file and get a report in the command line please run:
+```bash
+coverage run manage.py test
+coverage report
+```
+
 ## License
 
 This project is licensed under the MIT License
