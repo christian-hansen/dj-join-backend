@@ -58,7 +58,7 @@ class RegisterViewTest(TestCase):
     def test_register_success(self):
         # Test successful registration
         response = self.client.post(
-            '/api/v1/register/', {'username': 'new_user', 'email': 'new_user@example.com', 'password': 'new_password'})
+            '/api/v1/register/', {'username': 'new_user', 'email': 'new_user@example.com', 'first_name' : 'first_name', 'last_name' : 'last_name', 'password': 'new_password'})
         self.assertEqual(response.status_code, 201)
         # Check if user is created
         self.assertEqual(User.objects.filter(username='new_user').count(), 1)
@@ -66,9 +66,9 @@ class RegisterViewTest(TestCase):
     def test_register_existing_username(self):
         # Test registration with existing username
         User.objects.create_user(
-            username='existing_user', email='existing@example.com', password='existing_password')
+            username='existing_user', email='existing@example.com', first_name='first_name', last_name='last_name',password='existing_password')
         response = self.client.post(
-            '/api/v1/register/', {'username': 'existing_user', 'email': 'another@example.com', 'password': 'new_password'})
+            '/api/v1/register/', {'username': 'existing_user', 'email': 'another@example.com', 'first_name' : 'first_name', 'last_name' : 'last_name', 'password': 'new_password'})
         # Expecting 400 Bad Request for existing username
         self.assertEqual(response.status_code, 400)
 
@@ -137,7 +137,7 @@ class TaskAPITest(TestCase):
         self.client.force_authenticate(user=self.user, token=self.token)
         task = TaskItem.objects.create(title='Test Task', author=self.user)
         updated_data = {'title': 'Updated Task', 'description': 'Updated description',
-                        'priority': 'prio3', 'state': 'state2', 'isDone': True}
+                        'priority': 'High', 'state': 'In Progress', 'isDone': True}
 
         # Send PATCH request with JSON data to update task
         response = self.client.patch(
@@ -146,8 +146,8 @@ class TaskAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], 'Updated Task')
         self.assertEqual(response.data['description'], 'Updated description')
-        self.assertTrue(response.data['priority'], 'prio3')
-        self.assertTrue(response.data['state'], 'state2')
+        self.assertTrue(response.data['priority'], 'High')
+        self.assertTrue(response.data['state'], 'In Progress')
         self.assertTrue(response.data['isDone'])
 
     # Test loading single tasks information.
