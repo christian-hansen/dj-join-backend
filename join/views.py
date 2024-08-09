@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class LoginView(ObtainAuthToken):
-    # Login
+    """ View to login a user """
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
@@ -30,7 +30,7 @@ class LoginView(ObtainAuthToken):
 
 
 class RegisterView(APIView):
-    # Registration
+    """ View to register a user including error responses. """
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
@@ -59,7 +59,7 @@ class RegisterView(APIView):
 
 
 class ListTasks(APIView):
-    # All Tasks
+    """ View to load all tasks from the database """
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -82,7 +82,7 @@ class ListTasks(APIView):
 
 
 class TaskDetailView(APIView):
-    # Single Task Details
+    """ View to load a single tasks by its ID from the database. """
     
     def get(self, request, pk):
         task = TaskItem.objects.filter(id=pk)
@@ -111,7 +111,7 @@ class TaskDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ListUsers(APIView):
-    # All Users
+    """ View to load all users from the database. """
     
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -122,6 +122,8 @@ class ListUsers(APIView):
         return Response(serializer.data)
     
 class CurrentUserView(APIView):
+    """ View to load the current logged in user from the database. """
+    
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
