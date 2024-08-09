@@ -8,7 +8,7 @@ This is a learning project created as part of my studies with the Developer Akad
 
 1. Clone the Repository:
     ```bash
-    git clone https://github.com/benjaminBennewitz/binge_hub_backend.git
+    git clone https://github.com/christian-hansen/dj-join-backend.git
     cd dj-join-backend
     ```
 2. Create a virtual environment and install the dependencies:
