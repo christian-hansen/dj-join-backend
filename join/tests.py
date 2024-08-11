@@ -2,14 +2,14 @@ from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token  # Import Token model
 from django.contrib.auth.models import User
-from join.models import TaskItem
-from join.serializers import TaskItemSerializer
+from join.models import TaskItem, ContactItem
+from join.serializers import TaskItemSerializer, ContactItemSerializer
 from rest_framework import status
 
 
 class LoginTest(TestCase):
     # Tests for login
-    
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(
@@ -51,14 +51,14 @@ class LoginTest(TestCase):
 
 class RegisterViewTest(TestCase):
     # Tests for registration
-    
+
     def setUp(self):
         self.client = Client()
 
     def test_register_success(self):
         # Test successful registration
         response = self.client.post(
-            '/api/v1/register/', {'username': 'new_user', 'email': 'new_user@example.com', 'first_name' : 'first_name', 'last_name' : 'last_name', 'password': 'new_password'})
+            '/api/v1/register/', {'username': 'new_user', 'email': 'new_user@example.com', 'first_name': 'first_name', 'last_name': 'last_name', 'password': 'new_password'})
         self.assertEqual(response.status_code, 201)
         # Check if user is created
         self.assertEqual(User.objects.filter(username='new_user').count(), 1)
@@ -66,9 +66,9 @@ class RegisterViewTest(TestCase):
     def test_register_existing_username(self):
         # Test registration with existing username
         User.objects.create_user(
-            username='existing_user', email='existing@example.com', first_name='first_name', last_name='last_name',password='existing_password')
+            username='existing_user', email='existing@example.com', first_name='first_name', last_name='last_name', password='existing_password')
         response = self.client.post(
-            '/api/v1/register/', {'username': 'existing_user', 'email': 'another@example.com', 'first_name' : 'first_name', 'last_name' : 'last_name', 'password': 'new_password'})
+            '/api/v1/register/', {'username': 'existing_user', 'email': 'another@example.com', 'first_name': 'first_name', 'last_name': 'last_name', 'password': 'new_password'})
         # Expecting 400 Bad Request for existing username
         self.assertEqual(response.status_code, 400)
 
@@ -91,7 +91,7 @@ class RegisterViewTest(TestCase):
 
 class TaskAPITest(TestCase):
     # Tests for task listing and creation
-    
+
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
@@ -102,7 +102,7 @@ class TaskAPITest(TestCase):
     def test_create_task_success(self):
         self.client.force_authenticate(user=self.user, token=self.token)
         task_data = {'title': 'Test Task',
-                     'description': 'Test description', 'isDone': False}
+                     'description': 'Test description'}
 
         # Send POST request with JSON data
         response = self.client.post('/api/v1/tasks/', task_data, format='json')
@@ -111,7 +111,6 @@ class TaskAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], 'Test Task')
         self.assertEqual(response.data['description'], 'Test description')
-        self.assertFalse(response.data['isDone'])
 
         # Validate serializer data
         # Pass response.data to serializer
@@ -131,13 +130,13 @@ class TaskAPITest(TestCase):
         # Assuming no tasks exist initially
         self.assertEqual(len(response.data), 0)
 
-    # Test updating the title, description, priority, state and isDone.
+    # Test updating the title, description, priority, and state.
 
     def test_update_task_success(self):
         self.client.force_authenticate(user=self.user, token=self.token)
         task = TaskItem.objects.create(title='Test Task', author=self.user)
         updated_data = {'title': 'Updated Task', 'description': 'Updated description',
-                        'priority': 'High', 'state': 'In Progress', 'isDone': True}
+                        'priority': 'High', 'state': 'In Progress'}
 
         # Send PATCH request with JSON data to update task
         response = self.client.patch(
@@ -148,7 +147,6 @@ class TaskAPITest(TestCase):
         self.assertEqual(response.data['description'], 'Updated description')
         self.assertTrue(response.data['priority'], 'High')
         self.assertTrue(response.data['state'], 'In Progress')
-        self.assertTrue(response.data['isDone'])
 
     # Test loading single tasks information.
 
@@ -175,3 +173,73 @@ class TaskAPITest(TestCase):
         # Assert response status and ensure task is deleted
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(TaskItem.objects.filter(pk=task.pk).exists())
+
+
+class ContactAPITest(TestCase):
+    # Tests for contacts listing and creation
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='test_user', password='test_password', email='test@example.com')
+        self.token = Token.objects.create(user=self.user)
+
+    # Test loading all contacts.
+
+    def test_list_contacts(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+
+        # Send GET request to list contacts
+        response = self.client.get('/api/v1/contacts/')
+
+        # Assert response status and content
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Assuming no contacts exist initially
+        self.assertEqual(len(response.data), 0)
+
+    # Test updating the title, description, priority, and state.
+
+    def test_update_contact_success(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        contact = ContactItem.objects.create(
+            first_name='First Name', last_name='Last Name')
+        updated_data = {'first_name': 'Updated First Name',
+                        'last_name': 'Updated Last Name'}
+
+        # Send PATCH request with JSON data to update contact
+        response = self.client.patch(
+            f'/api/v1/contacts/{contact.pk}/', updated_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['first_name'], 'Updated First Name')
+        self.assertEqual(response.data['last_name'], 'Updated Last Name')
+        self.assertTrue(response.data['full_name'],
+                        'Updated First Name Updated Last Name')
+
+    # Test loading single contacts information.
+
+    def test_contact_detail(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        contact = ContactItem.objects.create(
+            first_name='First Name', last_name='Last Name')
+        # Send GET request to retrieve contact detail
+        response = self.client.get(f'/api/v1/contacts/{contact.pk}/')
+
+        # Assert response status and content
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['first_name'], 'First Name')
+        self.assertEqual(response.data[0]['last_name'], 'Last Name')
+
+    # Test deleting a single contact.
+
+    def test_delete_contact(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        contact = ContactItem.objects.create(
+            first_name='First Name', last_name='Last Name')
+
+        # Send DELETE request to delete contact
+        response = self.client.delete(f'/api/v1/contacts/{contact.pk}/')
+
+        # Assert response status and ensure contact is deleted
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(ContactItem.objects.filter(pk=contact.pk).exists())

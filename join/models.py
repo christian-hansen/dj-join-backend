@@ -27,7 +27,20 @@ class TaskItem(models.Model):
     priority = models.CharField(max_length=10, choices=PRIORITIES, default='Low')
     due_date = models.DateField(default=datetime.date.today)
     state = models.CharField(max_length=20, choices=STATES, default='To Do')
-    isDone = models.BooleanField(default=False)
+    # isDone = models.BooleanField(default=False)
     
     def __str__(self) -> str:
         return f'({self.id}) --- {self.title}'
+    
+class ContactItem(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=500)
+    created_at = models.DateField(default=datetime.date.today)
+    # author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # priority = models.CharField(max_length=10, choices=PRIORITIES, default='Low')
+    # due_date = models.DateField(default=datetime.date.today)
+    # state = models.CharField(max_length=20, choices=STATES, default='To Do')
+    # isDone = models.BooleanField(default=False)
+    
+    def __str__(self) -> str:
+        return f'({self.id}) --- {self.first_name} {self.last_name}'
