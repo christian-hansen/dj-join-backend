@@ -2,8 +2,8 @@ from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token  # Import Token model
 from django.contrib.auth.models import User
-from join.models import TaskItem, ContactItem
-from join.serializers import TaskItemSerializer, ContactItemSerializer
+from join.models import TaskItem, ContactItem, SubTaskItem
+from join.serializers import TaskItemSerializer, ContactItemSerializer, SubTaskItemSerializer
 from rest_framework import status
 
 
@@ -174,6 +174,120 @@ class TaskAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(TaskItem.objects.filter(pk=task.pk).exists())
 
+class SubTaskAPITest(TestCase):
+    # Tests for subtask listing and creation
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='test_user', password='test_password', email='test@example.com')
+        self.token = Token.objects.create(user=self.user)
+        
+     # Create a TaskItem to be used in subtask tests
+        self.task = TaskItem.objects.create(
+            title='Test Task',
+            description='Test Task Description',
+            author=self.user,
+            priority='Low',
+            due_date='2024-08-31',
+            state='To Do'
+        )
+
+    # Test creating a subtask.
+    def test_create_subtask_success(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        subtask_data = {
+            'title': 'Test SubTask',
+            'task': self.task.id  # Provide the valid task ID
+        }
+
+        # Send POST request with JSON data
+        response = self.client.post('/api/v1/subtasks/', subtask_data, format='json')
+
+        # Assert response status and content
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'Test SubTask')
+        self.assertEqual(response.data['task'], self.task.id)
+        self.assertEqual(response.data['isDone'], False)
+
+        # Validate serializer data
+        # Pass response.data to serializer
+        serializer = SubTaskItemSerializer(data=response.data)
+        self.assertTrue(serializer.is_valid())  # Validate serializer data
+    
+    # Test loading all tasks. 
+
+    def test_list_subtasks(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+
+        # Send GET request to list subtasks
+        response = self.client.get('/api/v1/subtasks/')
+
+        # Assert response status and content
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Assuming no subtasks exist initially
+        self.assertEqual(len(response.data), 0)
+    
+    # TODO Test load all subtasks for one task
+
+   
+    # # Test updating the title and isDone.
+
+    def test_update_subtask_success(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        subtask = SubTaskItem.objects.create(title='Test SubTask', task=self.task)
+        updated_data = {'title': 'Updated SubTask', 'isDone' : True}
+
+        # Send PATCH request with JSON data to update task
+        response = self.client.patch(
+            f'/api/v1/subtasks/{subtask.pk}/', updated_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], 'Updated SubTask')
+        self.assertEqual(response.data['isDone'], True)
+
+    # # Test loading single tasks information.
+
+    def test_subtask_detail(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        subtask = SubTaskItem.objects.create(title='Test SubTask', task=self.task)
+
+        # Send GET request to retrieve task detail
+        response = self.client.get(f'/api/v1/subtasks/{subtask.pk}/')
+
+        # Assert response status and content
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['title'], 'Test SubTask')
+
+    # Test deleting a single task.
+
+    def test_delete_subtask(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
+        subtask = SubTaskItem.objects.create(title='Test SubTask To Delete', task=self.task)
+
+        # Send DELETE request to delete task
+        response = self.client.delete(f'/api/v1/subtasks/{subtask.pk}/')
+
+        # Assert response status and ensure task is deleted
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(SubTaskItem.objects.filter(pk=subtask.pk).exists())
+        
+    # Test additing a subtask to a non-exisiting task.
+    def test_create_subtask_invalid_task(self):
+        """Test creating a subtask with an invalid task ID"""
+        self.client.force_authenticate(user=self.user, token=self.token)
+        subtask_data = {
+            'title': 'Test SubTask',
+            'task': 9999  # Provide a non-existent task ID
+        }
+
+        # Send POST request with JSON data
+        response = self.client.post('/api/v1/subtasks/', subtask_data, format='json')
+
+        # Assert response status and content
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('task', response.data)  # Ensure the 'task' field is in the response
+        self.assertEqual(response.data['task'][0], 'Invalid pk "9999" - object does not exist.')
 
 class ContactAPITest(TestCase):
     # Tests for contacts listing and creation
@@ -197,7 +311,7 @@ class ContactAPITest(TestCase):
         # Assuming no contacts exist initially
         self.assertEqual(len(response.data), 0)
 
-    # Test updating the title, description, priority, and state.
+    # Test updating the contacts first name and last name.
 
     def test_update_contact_success(self):
         self.client.force_authenticate(user=self.user, token=self.token)

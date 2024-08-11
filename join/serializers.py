@@ -1,11 +1,16 @@
 from rest_framework import serializers
-from join.models import TaskItem, ContactItem
+from join.models import TaskItem, ContactItem, SubTaskItem
 from django.contrib.auth.models import User
 
 
 class TaskItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskItem
+        fields = "__all__"
+
+class SubTaskItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubTaskItem
         fields = "__all__"
         
 class ContactItemSerializer(serializers.ModelSerializer):

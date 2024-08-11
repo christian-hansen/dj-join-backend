@@ -7,8 +7,8 @@ from rest_framework import status
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.views import View
-from join.models import TaskItem, ContactItem
-from join.serializers import TaskItemSerializer, UserItemSerializer, ContactItemSerializer
+from join.models import TaskItem, ContactItem, SubTaskItem
+from join.serializers import TaskItemSerializer, UserItemSerializer, ContactItemSerializer, SubTaskItemSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -110,6 +110,68 @@ class TaskDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ListSubTasks(APIView):
+    """ View to load all subtasks from the database """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        subtasks = SubTaskItem.objects.all()
+        serializer = SubTaskItemSerializer(subtasks, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+       # Extract the task and title from the request data
+        task_id = request.data.get('task')
+        title = request.data.get('title')
+        
+        # Ensure the task ID is provided
+        if not task_id:
+            return Response({'task': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'title': title,
+            'task': task_id
+        }
+
+
+        serializer = SubTaskItemSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()  # Save the data to the database
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubTaskDetailView(APIView):
+    """ View to load a single subtasks by its ID from the database. """
+    
+    def get(self, request, pk):
+        subtask = SubTaskItem.objects.filter(id=pk)
+        serializer = SubTaskItemSerializer(subtask, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        try:
+            subtask = SubTaskItem.objects.get(pk=pk)
+        except SubTaskItem.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        subtask.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk):
+        try:
+            subtask = SubTaskItem.objects.get(pk=pk)
+        except SubTaskItem.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SubTaskItemSerializer(subtask, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class ListUsers(APIView):
     """ View to load all users from the database. """
     
@@ -134,14 +196,13 @@ class CurrentUserView(APIView):
         })
 
 class ListContacts(APIView):
-    """ View to load all tasks from the database """
+    """ View to load all contacts from the database """
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        contacts = ContactItem.objects.all() # option to show all tasks for all users
-        # tasks = TaskItem.objects.filter(author=request.user) # option to show only the user tasks for the current user
+        contacts = ContactItem.objects.all()
         serializer = ContactItemSerializer(contacts, many=True)
         return Response(serializer.data)
 
@@ -160,7 +221,7 @@ class ListContacts(APIView):
 
 
 class ContactDetailView(APIView):
-    """ View to load a single tasks by its ID from the database. """
+    """ View to load a single contact by its ID from the database. """
     
     def get(self, request, pk):
         contact = ContactItem.objects.filter(id=pk)
