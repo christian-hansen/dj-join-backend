@@ -19,9 +19,18 @@ STATES = (
 )
 
 
+class ContactItem(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=500)
+    created_at = models.DateField(default=datetime.date.today)
+    
+    def __str__(self) -> str:
+        return f'({self.id}) - {self.first_name} {self.last_name}'
+    
 class TaskItem(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
+    contact = models.ForeignKey(ContactItem, on_delete=models.SET_NULL, null=True, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateField(default=datetime.date.today)
     priority = models.CharField(max_length=10, choices=PRIORITIES, default='Low')
@@ -45,10 +54,3 @@ class SubTaskItem(models.Model):
     def __str__(self) -> str:
         return f'({self.id}) -- {self.task} -- {self.title}'
     
-class ContactItem(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=500)
-    created_at = models.DateField(default=datetime.date.today)
-    
-    def __str__(self) -> str:
-        return f'({self.id}) - {self.first_name} {self.last_name}'

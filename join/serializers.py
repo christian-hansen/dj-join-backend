@@ -9,7 +9,7 @@ class TaskItemSerializer(serializers.ModelSerializer):
         model = TaskItem
         # fields = "__all__"  # Keep all existing fields
         # Optionally, specify the exact fields including the new `subtask_ids`
-        fields = ['id', 'title', 'description', 'author', 'created_at', 'priority', 'due_date', 'state', 'subtask_ids']
+        fields = ['id', 'title', 'description', 'contact', 'author', 'created_at', 'priority', 'due_date', 'state', 'subtask_ids']
 
     def get_subtask_ids(self, obj):
         # Retrieve all related subtasks and return their IDs
