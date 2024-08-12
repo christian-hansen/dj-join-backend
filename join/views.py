@@ -171,6 +171,18 @@ class SubTaskDetailView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class TaskSubtasksView(APIView):
+    """View to list all subtasks for a specific task."""
+
+    def get(self, request, task_id, format=None):
+        subtasks = SubTaskItem.objects.filter(task_id=task_id)
+        
+        if not subtasks.exists():
+            return Response({'detail': 'No subtasks found for this task.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = SubTaskItemSerializer(subtasks, many=True)
+        return Response(serializer.data)
 
 class ListUsers(APIView):
     """ View to load all users from the database. """

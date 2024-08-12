@@ -229,7 +229,46 @@ class SubTaskAPITest(TestCase):
         self.assertEqual(len(response.data), 0)
     
     # TODO Test load all subtasks for one task
+    def test_list_subtasks_for_specific_task(self):
+        self.client.force_authenticate(user=self.user, token=self.token)
 
+        # Create two tasks
+        task1 = TaskItem.objects.create(
+            title='Task 1',
+            description='Task 1 Description',
+            author=self.user,
+            priority='Low',
+            due_date='2024-08-31',
+            state='To Do'
+        )
+        task2 = TaskItem.objects.create(
+            title='Task 2',
+            description='Task 2 Description',
+            author=self.user,
+            priority='High',
+            due_date='2024-09-01',
+            state='In Progress'
+        )
+
+        # Create subtasks for each task
+        SubTaskItem.objects.create(title='Subtask 1', task=task1)
+        SubTaskItem.objects.create(title='Subtask 2', task=task1)
+        SubTaskItem.objects.create(title='Subtask for Other Task', task=task2)
+
+        # Make GET request to fetch subtasks for task1
+        response = self.client.get(f'/api/v1/tasks/{task1.id}/subtasks/')
+
+        # Check if the response status is 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify that only the subtasks associated with task1 are returned
+        self.assertEqual(len(response.data), 2)  # Expecting 2 subtasks for task1
+        self.assertEqual(response.data[0]['title'], 'Subtask 1')
+        self.assertEqual(response.data[1]['title'], 'Subtask 2')
+
+        # Check that subtasks belong to the correct task
+        for subtask in response.data:
+            self.assertEqual(subtask['task'], task1.id)
    
     # # Test updating the title and isDone.
 
