@@ -8,7 +8,7 @@ from rest_framework import status
 
 
 class LoginTest(TestCase):
-    # Tests for login
+    # Tests for login functionality
 
     def setUp(self):
         self.client = Client()
