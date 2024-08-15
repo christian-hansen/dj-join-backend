@@ -21,14 +21,22 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install Dependencies
       run: |
         python -m venv env
         source env/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        python manage.py makemigrations
-        python manage.py migrate
+    
+    - name: Check Installed Packages
+      run: |
+        source env/bin/activate
+        pip list
+
     - name: Run Tests
       run: |
+        source env/bin/activate
+        python manage.py makemigrations
+        python manage.py migrate
         python manage.py test
